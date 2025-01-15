@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Hash": "aNdkGRrRvIzK6AgMlmJ2JoiPACvybs1FfqLZmT8phBQ=",
+  "Source": "TimeDepositAPI",
+  "BasePath": "_content/TimeDepositAPI",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": [],
+  "Endpoints": []
+}

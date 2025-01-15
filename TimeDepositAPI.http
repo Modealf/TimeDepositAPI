@@ -1,0 +1,6 @@
+@TimeDepositAPI_HostAddress = http://localhost:5059
+
+GET {{TimeDepositAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
