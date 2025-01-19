@@ -9,24 +9,17 @@ namespace TimeDepositAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+    public class AuthController(IAuthService authService) : ControllerBase
     {
-        private readonly IAuthService _authService;
-
-        public AuthController(IAuthService authService)
-        {
-            _authService = authService;
-        }
-
         // POST: api/auth/register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDto request)
         {
             try
             {
-                await _authService.RegisterAsync(request);
+                await authService.RegisterAsync(request);
                 var loginRequest = new LoginRequestDto { Email = request.Email, Password = request.Password };
-                var token = await _authService.LoginAsync(loginRequest);
+                var token = await authService.LoginAsync(loginRequest);
                 return Ok(new LoginResponseDto { Token = token });
             }
             catch (Exception ex)
@@ -41,12 +34,12 @@ namespace TimeDepositAPI.Controllers
         {
             try
             {
-                var token = await _authService.LoginAsync(request);
+                var token = await authService.LoginAsync(request);
                 return Ok(new LoginResponseDto { Token = token });
             }
             catch (Exception ex)
             {
-                return Unauthorized(ex.Message);
+                return BadRequest(ex.Message);
             }
         }
     }

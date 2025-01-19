@@ -139,3 +139,6 @@
 /Users/modealf/Projects/TimeDepositAPI/bin/Debug/net9.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 /Users/modealf/Projects/TimeDepositAPI/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
 /Users/modealf/Projects/TimeDepositAPI/bin/Debug/net9.0/System.IdentityModel.Tokens.Jwt.dll
+/Users/modealf/Projects/TimeDepositAPI/bin/Debug/net9.0/FluentValidation.dll
+/Users/modealf/Projects/TimeDepositAPI/bin/Debug/net9.0/FluentValidation.AspNetCore.dll
+/Users/modealf/Projects/TimeDepositAPI/bin/Debug/net9.0/FluentValidation.DependencyInjectionExtensions.dll

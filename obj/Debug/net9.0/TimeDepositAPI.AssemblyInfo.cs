@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TimeDepositAPI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52c809836d71651507737ce77b2a1a8b691af4a4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a3286a148400f2887f50f24acba17bafa051a2b9")]
 [assembly: System.Reflection.AssemblyProductAttribute("TimeDepositAPI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TimeDepositAPI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

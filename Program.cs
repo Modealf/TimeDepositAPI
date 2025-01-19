@@ -4,11 +4,16 @@ using System.Text;
 using TimeDepositAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using TimeDepositAPI.Data;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddFluentValidation(options =>
+{
+    // Automatically register validators from this assembly.
+    options.RegisterValidatorsFromAssemblyContaining<Program>();
+});
 builder.Services.AddScoped<IAuthService, AuthService>();
 // Register the DbContext with PostgreSQL provider
 builder.Services.AddDbContext<AppDbContext>(options =>
