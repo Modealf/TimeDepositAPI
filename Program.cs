@@ -1,7 +1,15 @@
+
+using Microsoft.EntityFrameworkCore;
+using TimeDepositAPI.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllers();  // Add this line
+builder.Services.AddControllers();
+
+// Register the DbContext with PostgreSQL provider
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
