@@ -2,6 +2,14 @@ using System;
 
 namespace TimeDepositAPI.Models
 {
+    public enum Status{
+    Waiting,
+    InProgress,
+    Completed,
+    Canceled,
+    Deleted,
+    }
+    
     public class CrowdDepositOffer
     {
         public int Id { get; set; }
@@ -9,6 +17,6 @@ namespace TimeDepositAPI.Models
         public double APY { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime MaturityDate { get; set; }
-        public bool IsActive { get; set; }
+        public Status Status { get; set; }
     }
 }

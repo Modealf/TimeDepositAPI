@@ -20,7 +20,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register JWT Token Service
+builder.Services.AddScoped<ITopUpService, TopUpService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<IDepositService, DepositService>();
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -42,6 +45,24 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+    };
+    options.Events = new JwtBearerEvents
+    {
+    //      OnMessageReceived = context =>
+    //      {
+    //          return null;
+    //      },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("Authentication failed: " + context.Exception.Message);
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("Token validated for " + context.Principal.Identity.Name);
+            return Task.CompletedTask;
+        }
+        // Other event handlers as needed...
     };
 });
 

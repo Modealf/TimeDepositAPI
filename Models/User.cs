@@ -16,6 +16,8 @@ namespace TimeDepositAPI.Models
         public required string PasswordHash { get; set; }
         public required string FirstName { get; set; }
         public required string LastName { get; set; }
+        
+        public required decimal Balance { get; set; }
 
         // New Role property with a default value
         public UserRole Role { get; set; } = UserRole.User;

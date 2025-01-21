@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TimeDepositAPI.DTOs;
 using TimeDepositAPI.Services;
@@ -35,11 +36,26 @@ namespace TimeDepositAPI.Controllers
             try
             {
                 var token = await authService.LoginAsync(request);
-                return Ok(new LoginResponseDto { Token = token });
+                return Ok(new RegisterResponseDto { Token = token });
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("update")]
+        public async Task<IActionResult> UpdateInfo([FromBody] UpdateUserRequestDto request)
+        {
+            try
+            {
+                var message = await authService.UpdateUserInfoAsync(request);
+                return Ok(new UpdateUserResponseDto { Message = message });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
             }
         }
     }

@@ -11,6 +11,8 @@ namespace TimeDepositAPI.Services
     {
         Task<string> RegisterAsync(RegisterRequestDto request);
         Task<string> LoginAsync(LoginRequestDto request);
+        
+        Task<string> UpdateUserInfoAsync(UpdateUserRequestDto request);
     }
 
     public class AuthService : IAuthService
@@ -39,8 +41,9 @@ namespace TimeDepositAPI.Services
                 PasswordHash = hashedPassword,
                 FirstName = request.FirstName,
                 LastName = request.LastName,
-                Role = UserRole.User,
-                Deposits = new List<Deposit>() // Initialize the Deposits property
+                Role = request.Role,
+                Deposits = new List<Deposit>(), // Initialize the Deposits property
+                Balance = 0
             };
 
             _context.Users.Add(user);
@@ -59,6 +62,17 @@ namespace TimeDepositAPI.Services
 
             var token = _jwtTokenService.GenerateToken(user);
             return token;
+        }
+
+        public async Task<string> UpdateUserInfoAsync(UpdateUserRequestDto request)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == request.Email);
+            user.FirstName = request.FirstName;
+            user.LastName = request.LastName;
+            user.Email = request.Email;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+            await _context.SaveChangesAsync();
+            return "Updated";
         }
     }
 }
