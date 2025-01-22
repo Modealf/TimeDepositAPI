@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TimeDepositAPI.Data;
 using TimeDepositAPI.DTOs;
 using TimeDepositAPI.Models;
@@ -9,7 +10,8 @@ public interface IAdminService
     public Task<string> CreateCrowdDepositOfferAsync(CreateCrowdDepositOfferDto createCrowdDepositOfferDto);
     public Task<string> UpdateCrowdDepositOfferAsync(UpdateCrowdDepositOfferDto updateCrowdDepositOfferDto);
     public Task<string> DeleteCrowdDepositOfferAsync(DeleteCrowdDepositOfferDto deleteCrowdDepositOfferDto);
-
+    public Task<string> ApproveCustomDepositAsync(ApproveCustomDepositRequestDto request);
+    public Task<string> RejectCustomDepositAsync(RejectCustomDepositRequestDto request);
 }
 
 public class AdminService : IAdminService
@@ -26,6 +28,7 @@ public class AdminService : IAdminService
         var crowdDepositOffer = new CrowdDepositOffer{
             Amount = createCrowdDepositOfferDto.Amount,
             APY = createCrowdDepositOfferDto.APY,
+            Period = createCrowdDepositOfferDto.Period,
             StartDate = createCrowdDepositOfferDto.StartDate,
             MaturityDate = createCrowdDepositOfferDto.MaturityDate,
             Status = Status.Waiting
@@ -59,5 +62,41 @@ public class AdminService : IAdminService
         crowdDepositOffer.Status = Status.Deleted;
         await _context.SaveChangesAsync();
         return "Crowd deposit offer successfully deleted";
+    }
+    
+    public async Task<string> ApproveCustomDepositAsync(ApproveCustomDepositRequestDto approveCustomDepositRequestDto)
+    {
+        CustomDepositRequest? customDepositRequest = await _context.CustomDepositRequests.FirstOrDefaultAsync(c => c.Id == approveCustomDepositRequestDto.DepositId);
+        if (customDepositRequest is null)
+            throw new BadHttpRequestException("Custom deposit request not found");
+
+        User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == customDepositRequest.UserId);
+        if (user is null)
+            throw new BadHttpRequestException("No User matching this deposit request has been found");
+            
+        Deposit deposit = new Deposit
+        {
+            UserId = customDepositRequest.UserId,
+            Amount = customDepositRequest.Amount,
+            Type = DepositType.Custom,
+            StartDate = approveCustomDepositRequestDto.StartDate,
+            MaturityDate = approveCustomDepositRequestDto.MaturityDate,
+            APY = approveCustomDepositRequestDto.APY,
+            User = user
+        };
+        await _context.Deposits.AddAsync(deposit);
+        await _context.SaveChangesAsync();
+            
+        return "Custom deposit request has been approved";
+    }
+
+    public async Task<string> RejectCustomDepositAsync(RejectCustomDepositRequestDto request)
+    {
+        var customDepositRequest = await _context.CustomDepositRequests.FirstOrDefaultAsync(c => c.Id == request.DepositId);
+        if (customDepositRequest is null)
+            throw new BadHttpRequestException("Custom deposit request not found");
+        customDepositRequest.Status = CustomDepositStatus.Rejected;
+        await _context.SaveChangesAsync();
+        return "Custom deposit request has been rejected";
     }
 }

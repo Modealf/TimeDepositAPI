@@ -12,11 +12,11 @@ namespace TimeDepositAPI.Services
 {
     public interface IDepositService
     {
-        Task<Deposit> CreateCustomDepositAsync(int userId, CreateCustomDepositRequestDto request);
-        Task<IEnumerable<Deposit>> GetUserDepositsAsync(int userId);
-        Task<Deposit> GetDepositByIdAsync(int depositId, int userId);
-        // Add methods for enrolling in crowd deposits, rollovers, etc.
-        Task<IEnumerable<CrowdDepositOffer>> GetAvailableCrowdDeposits();
+        public Task<string> RequestCustomDepositAsync(int userId, CreateCustomDepositRequestDto request);
+        public Task<IEnumerable<Deposit>> GetUserDepositsAsync(int userId);
+        public Task<Deposit> GetDepositByIdAsync(int depositId, int userId);
+        public Task<IEnumerable<CrowdDepositOffer>> GetAvailableCrowdDepositsAsync();
+        public Task<string> EnrollInCrowdDepositAsync(int userId, EnrollCrowdDepositRequestDto request);
     }
 
     public class DepositService : IDepositService
@@ -28,34 +28,24 @@ namespace TimeDepositAPI.Services
             _context = context;
         }
 
-        public async Task<Deposit> CreateCustomDepositAsync(int userId, CreateCustomDepositRequestDto request)
+        public async Task<string> RequestCustomDepositAsync(int userId, CreateCustomDepositRequestDto request)
         {
-            // Basic validation & business logic could go here
-
-            // Example APY calculation logic (simplified; adjust as needed)
-            double calculatedApy = CalculateApy(request.Amount, request.DurationInDays);
             User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user is null)
                 throw new ApplicationException("User not found");
-            
-            // Create new deposit
-            var deposit = new Deposit
+
+            var customDepositRequest = new CustomDepositRequest
             {
-                UserId = userId,
                 Amount = request.Amount,
-                Type = DepositType.Customized,
-                StartDate = DateTime.UtcNow,
-                MaturityDate = DateTime.UtcNow.AddDays(request.DurationInDays),
-                APY = calculatedApy,
-                RolloverUntil = null,
-                User = user
+                DurationInDays = request.DurationInDays,
+                User = user,
+                UserId = user.Id,
             };
-
-            _context.Deposits.Add(deposit);
+            // should await for both lines or only one?
+            await _context.CustomDepositRequests.AddAsync(customDepositRequest);
             await _context.SaveChangesAsync();
-
-            return deposit;
+            return "Your deposit request has been created";
         }
 
         public async Task<IEnumerable<Deposit>> GetUserDepositsAsync(int userId)
@@ -71,19 +61,46 @@ namespace TimeDepositAPI.Services
                 .FirstAsync(d => d.Id == depositId && d.UserId == userId);
         }
 
-        public async Task<IEnumerable<CrowdDepositOffer>> GetAvailableCrowdDeposits()
+        public async Task<IEnumerable<CrowdDepositOffer>> GetAvailableCrowdDepositsAsync()
         {
             DateTime now = DateTime.UtcNow;
-            var deposits= await _context.CrowdDepositOffers.Where(d => d.StartDate < now).ToListAsync();
+            var deposits = await _context.CrowdDepositOffers.Where(d => d.StartDate < now).ToListAsync();
             return deposits;
         }
 
-        // Placeholder for APY calculation logic
-        private double CalculateApy(decimal amount, int durationInDays)
+        public async Task<string> EnrollInCrowdDepositAsync(int userId, EnrollCrowdDepositRequestDto request)
         {
-            
-            // Implement your APY logic based on business requirements
-            return 5.0; // Example APY
+            User? user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user is null)
+                throw new BadHttpRequestException("User not found");
+
+            var crowdDepositOffer = await _context.CrowdDepositOffers.FirstOrDefaultAsync(d => d.Id == request.OfferId);
+
+            if (crowdDepositOffer is null)
+                throw new BadHttpRequestException("Crowd deposit offer not found");
+
+            if (request.Amount > user.Balance)
+                throw new BadHttpRequestException("Insufficient funds for this deposit please charge " +
+                                                  (request.Amount - user.Balance));
+
+            user.Balance -= request.Amount;
+
+            var deposit = new Deposit
+            {
+                UserId = userId,
+                Amount = request.Amount,
+                Type = DepositType.Crowd,
+                Period = crowdDepositOffer.Period,
+                StartDate = crowdDepositOffer.StartDate,
+                MaturityDate = crowdDepositOffer.MaturityDate,
+                APY = crowdDepositOffer.APY,
+                RolloverUntil = request.RolloverUntilDate,
+                User = user
+            };
+            // user.Deposits.Add(deposit);
+            await _context.Deposits.AddAsync(deposit);
+            await _context.SaveChangesAsync();
+            return "successfully enrolled in crowd deposit";
         }
     }
 }

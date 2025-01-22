@@ -14,12 +14,12 @@ builder.Services.AddControllers().AddFluentValidation(options =>
     // Automatically register validators from this assembly.
     options.RegisterValidatorsFromAssemblyContaining<Program>();
 });
-builder.Services.AddScoped<IAuthService, AuthService>();
 // Register the DbContext with PostgreSQL provider
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Register JWT Token Service
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITopUpService, TopUpService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IDepositService, DepositService>();

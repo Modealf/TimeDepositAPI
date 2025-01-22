@@ -22,15 +22,16 @@ namespace TimeDepositAPI.Controllers
             return userIdClaim != null ? int.Parse(userIdClaim.Value) : 0;
         }
         
-        [HttpPost("custom")]
-        public async Task<IActionResult> CreateCustomDeposit([FromBody] CreateCustomDepositRequestDto request)
+        [Authorize]
+        [HttpPost("request-custom")]
+        public async Task<IActionResult> RequestCustomDeposit([FromBody] CreateCustomDepositRequestDto request)
         {
             int userId = GetUserId();
-            var deposit = await depositService.CreateCustomDepositAsync(userId, request);
-            // Map deposit to response DTO if needed
+            var deposit = await depositService.RequestCustomDepositAsync(userId, request);
             return Ok(deposit);
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetDeposits()
         {
@@ -42,11 +43,12 @@ namespace TimeDepositAPI.Controllers
         [HttpGet("Available")]
         public async Task<IActionResult> GetAvailableDeposits()
         {
-            var crowdDepositOffers = await depositService.GetAvailableCrowdDeposits();
+            var crowdDepositOffers = await depositService.GetAvailableCrowdDepositsAsync();
             var result = new GetAvailableCrowdDepositsResponseDto { CrowdDepositOffers = crowdDepositOffers.ToList() };
             return Ok(result);
         }
 
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetDeposit(int id)
         {
@@ -57,6 +59,13 @@ namespace TimeDepositAPI.Controllers
             return Ok(deposit);
         }
 
-        // Add endpoints for crowd deposit enrollment and rollover as needed
+        [Authorize]
+        [HttpPost("Crowd/enroll")]
+        public async Task<IActionResult> EnrollInCrowdDeposit([FromBody] EnrollCrowdDepositRequestDto request)
+        {
+            int userId = GetUserId();
+            await depositService.EnrollInCrowdDepositAsync(userId, request);
+            return Ok("Enrolled");
+        }
     }
 }

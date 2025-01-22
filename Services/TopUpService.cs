@@ -30,7 +30,7 @@ namespace TimeDepositAPI.Services
             var user = await _context.Users.SingleOrDefaultAsync(u => u.Id == userId);
             user.Balance += request.Amount;
             await _context.SaveChangesAsync();
-            return "Account Successfully Topped Up";
+            return "Account Successfully Topped Up, New Balance is " + user.Balance;
         }
 
         public async Task<decimal> GetWalletBalanceAsync(int userId)

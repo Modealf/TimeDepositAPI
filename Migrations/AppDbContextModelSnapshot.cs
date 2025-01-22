@@ -39,6 +39,9 @@ namespace TimeDepositAPI.Migrations
                     b.Property<DateTime>("MaturityDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("Period")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -48,6 +51,33 @@ namespace TimeDepositAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("CrowdDepositOffers");
+                });
+
+            modelBuilder.Entity("TimeDepositAPI.Models.CustomDepositRequest", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("DurationInDays")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CustomDepositRequests");
                 });
 
             modelBuilder.Entity("TimeDepositAPI.Models.Deposit", b =>
@@ -66,6 +96,9 @@ namespace TimeDepositAPI.Migrations
 
                     b.Property<DateTime>("MaturityDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Period")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("RolloverUntil")
                         .HasColumnType("timestamp with time zone");
@@ -119,6 +152,17 @@ namespace TimeDepositAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("TimeDepositAPI.Models.CustomDepositRequest", b =>
+                {
+                    b.HasOne("TimeDepositAPI.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("TimeDepositAPI.Models.Deposit", b =>

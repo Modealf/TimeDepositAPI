@@ -10,6 +10,7 @@ namespace TimeDepositAPI.DTOs
     {
         public int OfferId { get; set; }
         public decimal Amount { get; set; }
+        public DateTime? RolloverUntilDate { get; set; }
     }
     
     // You can add other DTOs as needed for update, rollover, etc.

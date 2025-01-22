@@ -4,15 +4,25 @@ namespace TimeDepositAPI.Models
 {
     public enum DepositType
     {
-        Customized,
+        Custom,
         Crowd
     }
+    
+    public enum Period
+    {
+        None,
+        Daily,
+        Weekly,
+        Monthly,
+    }
+    
 
     public class Deposit
     {
         public int Id { get; set; }
         public decimal Amount { get; set; }
         public DepositType Type { get; set; }
+        public Period Period { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime MaturityDate { get; set; }
         public double APY { get; set; }

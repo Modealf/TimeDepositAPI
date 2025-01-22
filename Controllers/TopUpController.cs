@@ -25,19 +25,19 @@ namespace TimeDepositAPI.Controllers
         {
             var userId = GetUserId();
             var balance = await topUpService.GetWalletBalanceAsync(userId);
-            
-            return Ok(new { Balance = balance });
+
+            return Ok(new Walletbalance { Balance = balance });
         }
-        
-        
+
+
         [HttpPost()]
         public async Task<IActionResult> TopUpAccount([FromBody] TopUpRequestDto request)
         {
             try
             {
-            int userId = GetUserId();
-            var topUp = await topUpService.TopUpAccountAsync(userId, request);
-            return Ok(topUp);
+                int userId = GetUserId();
+                var topUp = await topUpService.TopUpAccountAsync(userId, request);
+                return Ok(new TopUpResponse {Message = topUp});
             }
             catch (Exception e)
             {
@@ -45,7 +45,5 @@ namespace TimeDepositAPI.Controllers
                 return BadRequest("Something went wrong");
             }
         }
-        
-        
     }
 }

@@ -15,5 +15,6 @@ namespace TimeDepositAPI.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Deposit> Deposits { get; set; }
         public DbSet<CrowdDepositOffer> CrowdDepositOffers { get; set; }
+        public DbSet<CustomDepositRequest> CustomDepositRequests { get; set; }
     }
 }
