@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-using BCrypt.Net;
 using Microsoft.EntityFrameworkCore;
 using TimeDepositAPI.Data;
 using TimeDepositAPI.DTOs;

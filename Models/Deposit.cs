@@ -26,6 +26,7 @@ namespace TimeDepositAPI.Models
         public DateTime StartDate { get; set; }
         public DateTime MaturityDate { get; set; }
         public double APY { get; set; }
+        public Status Status { get; set; }
 
         // Replace IsRolledOver with RolloverUntil
         public DateTime? RolloverUntil { get; set; }

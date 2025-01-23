@@ -1,16 +1,16 @@
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TimeDepositAPI.DTOs;
-using TimeDepositAPI.Models;
 using TimeDepositAPI.Services;
 
 namespace TimeDepositAPI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AdminController(IAdminService adminService) : ControllerBase
+public class AdminController(IAdminService adminService, IBackgroundJobClient backgroundJobClient) : ControllerBase
 {
-
+        
     [Authorize(Roles = "Admin")]
     [HttpPost("crowd/deposit-offer")]
     public async Task<IActionResult> CreateCrowdDepositOffer([FromBody] CreateCrowdDepositOfferDto createCrowdDepositOfferDto)

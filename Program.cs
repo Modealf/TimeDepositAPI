@@ -5,6 +5,8 @@ using TimeDepositAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using TimeDepositAPI.Data;
 using FluentValidation.AspNetCore;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +26,7 @@ builder.Services.AddScoped<ITopUpService, TopUpService>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<IDepositService, DepositService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IRolloverService, RolloverService>();
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -66,6 +69,13 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// Configure Hangfire to use PostgreSQL storage
+builder.Services.AddHangfire(configuration => configuration
+    .UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add Hangfire server
+builder.Services.AddHangfireServer();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -74,6 +84,16 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseHangfireDashboard("/hangfire", new DashboardOptions
+{
+    // Authorization = new[] { new HangfireAuthorizationFilter() }
+});
+
+// Schedule recurring job
+RecurringJob.AddOrUpdate<IRolloverService>(
+    "process-matured-deposits",
+    service => service.ProcessMaturedDepositsAsync(),
+    Cron.Minutely);
 
 app.MapControllers();  // Add this line to map controller endpoints
 

@@ -25,7 +25,7 @@ public class AdminService : IAdminService
 
     public async Task<string> CreateCrowdDepositOfferAsync(CreateCrowdDepositOfferDto createCrowdDepositOfferDto)
     {
-        var crowdDepositOffer = new CrowdDepositOffer{
+        CrowdDepositOffer crowdDepositOffer = new CrowdDepositOffer{
             Amount = createCrowdDepositOfferDto.Amount,
             APY = createCrowdDepositOfferDto.APY,
             Period = createCrowdDepositOfferDto.Period,
