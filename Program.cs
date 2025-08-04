@@ -16,6 +16,52 @@ builder.Services.AddControllers().AddFluentValidation(options =>
     // Automatically register validators from this assembly.
     options.RegisterValidatorsFromAssemblyContaining<Program>();
 });
+
+// Add Swagger services
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Time Deposit API",
+        Version = "v1",
+        Description = "API for managing time deposits, users, and financial operations",
+        Contact = new Microsoft.OpenApi.Models.OpenApiContact
+        {
+            Name = "Time Deposit API Team"
+        }
+    });
+
+    // Include XML comments for better API documentation
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
+
+    // Configure JWT Bearer token in Swagger
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 // Register the DbContext with PostgreSQL provider
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -51,10 +97,6 @@ builder.Services.AddAuthentication(options =>
     };
     options.Events = new JwtBearerEvents
     {
-    //      OnMessageReceived = context =>
-    //      {
-    //          return null;
-    //      },
         OnAuthenticationFailed = context =>
         {
             Console.WriteLine("Authentication failed: " + context.Exception.Message);
@@ -65,7 +107,6 @@ builder.Services.AddAuthentication(options =>
             Console.WriteLine("Token validated for " + context.Principal.Identity.Name);
             return Task.CompletedTask;
         }
-        // Other event handlers as needed...
     };
 });
 
@@ -79,6 +120,15 @@ builder.Services.AddHangfireServer();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Time Deposit API v1");
+        c.RoutePrefix = "swagger";
+    });
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -86,7 +136,7 @@ app.UseAuthorization();
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions
 {
-    // Authorization = new[] { new HangfireAuthorizationFilter() }
+    Authorization = new[] { new HangfireAuthorizationFilter() }
 });
 
 // Schedule recurring job
